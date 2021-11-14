@@ -13,7 +13,16 @@ class Bloch:
         else: self.featureready = True
 
         if pauli is None: self.pauliready = False
-        else: self.pauliready = True
+        else:
+            self.pauliready = True
+
+            if self.pauli[-1] == 1:
+                raise ValueError('last pauli components cannot be 1')
+
+            radius = sum(p**2 for p in self.pauli)
+            if radius >= 1:
+                raise ValueError('pauli components must be normalized while'
+                    +'radius='+str(radius))
 
         if self.featureready: self.dim = len(self.feature)
         elif self.pauliready: self.dim = ceil(len(self.pauli)**0.5)
@@ -47,8 +56,7 @@ class Bloch:
 
 def main():
 
-    a = Bloch()
-    a.pauli_matrix(3)
+    a = Bloch(np.array([3,4]), pauli=np.array([0.9,1.0]))
     b = Bloch(np.array([3,4]))
     print('dist(a,b)=',a.distance(b))
 
