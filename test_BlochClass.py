@@ -23,15 +23,12 @@ class TestBlochClass(unittest.TestCase):
       pass
 
   def test_distance(self): # function's name have to start with "test_"
-
     a = Bloch()
     b = Bloch()
     self.assertRaises(ValueError, a.distance, b)
-
     a = Bloch([0])
     b = Bloch([0,1])
     self.assertRaises(ValueError, a.distance, b)
-
     a = Bloch(np.array([0,0]))
     b = Bloch(np.array([3,4]))
     self.assertAlmostEqual(a.distance(b),5)
@@ -46,11 +43,19 @@ class TestBlochClass(unittest.TestCase):
         a = Bloch()
         a.evalpauli()
 
-
   def test_types(self):
     # Make sure type error raised when necessary
     self.assertRaises(TypeError, Bloch,np.array([1+1j]))
     self.assertRaises(TypeError, Bloch,np.array([True]))
+
+  def test_evalpauli(self):
+    # Make sure type pauli components are calculated correctly
+    a=Bloch(feature=[1,1]); a.evalpauli() # 2D
+    self.assertAlmostEqual(a.pauli,[2/3,2/3,1/3])
+    a=Bloch(feature=[1,2,3]); a.evalpauli()  #3D
+    self.assertAlmostEqual(a.pauli,[2/15,4/15,6/15,13/15])
+    a=Bloch(feature=[1,0,0,1]); a.evalpauli()  #4D
+    self.assertAlmostEqual(a.pauli,[2/3,0/3,0/3,2/3,1/3])
 
 # list of all asserts:
 # assertEqual(a, b)
