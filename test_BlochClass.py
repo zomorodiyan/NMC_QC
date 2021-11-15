@@ -51,11 +51,11 @@ class TestBlochClass(unittest.TestCase):
   def test_evalpauli(self):
     # Make sure pauli components are calculated correctly
     a=Bloch(feature=[1,1]); a.evalpauli() # 2D
-    self.assertAlmostEqual(a.pauli,[2/3,2/3,1/3])
+    np.testing.assert_array_almost_equal(a.pauli, [2/3,2/3,1/3])
     a=Bloch(feature=[1,2,3]); a.evalpauli()  #3D
-    self.assertAlmostEqual(a.pauli,[2/15,4/15,6/15,13/15])
+    np.testing.assert_array_almost_equal(a.pauli,[2/15,4/15,6/15,13/15])
     a=Bloch(feature=[1,0,0,1]); a.evalpauli()  #4D
-    self.assertAlmostEqual(a.pauli,[2/3,0/3,0/3,2/3,1/3])
+    np.testing.assert_array_almost_equal(a.pauli,[2/3,0/3,0/3,2/3,1/3])
 
   def test_evalfeature(self):
     # Make sure features are calculated correctly for n+1 dimensional pauli co.
@@ -65,6 +65,32 @@ class TestBlochClass(unittest.TestCase):
     np.testing.assert_array_almost_equal(a.feature, [1,2,3])
     a=Bloch(pauli=[2/3,0/3,0/3,2/3,1/3]); a.evalfeature()  #4D
     np.testing.assert_array_almost_equal(a.feature, [1,0,0,1])
+
+  def test_paulimatrix(self):
+    a=Bloch(); #undefined dim
+    self.assertRaises(ValueError, a.pauli_matrix, 0)
+    a=Bloch(); a.dim=2 #invalid n
+    self.assertRaises(ValueError, a.pauli_matrix, 4)
+    self.assertRaises(ValueError, a.pauli_matrix, -4)
+    a=Bloch(); a.dim=2 # 2D
+    np.testing.assert_array_almost_equal(a.pauli_matrix(0),[[0,1],[1,0]])
+    np.testing.assert_array_almost_equal(a.pauli_matrix(1),[[0,-1j],[1j,0]])
+    np.testing.assert_array_almost_equal(a.pauli_matrix(2),[[1,0],[0,-1]])
+    a=Bloch(); a.dim=3 # 3D
+    np.testing.assert_array_almost_equal(a.pauli_matrix(0)\
+            ,[[0,1,0],[1,0,0],[0,0,0]])
+    np.testing.assert_array_almost_equal(a.pauli_matrix(1)\
+            ,[[0,0,1],[0,0,0],[1,0,0]])
+    np.testing.assert_array_almost_equal(a.pauli_matrix(6)\
+            ,[[1,0,0],[0,-1,0],[0,0,0]])
+    a=Bloch(); a.dim=4 # 4D
+    np.testing.assert_array_almost_equal(a.pauli_matrix(0)\
+            ,[[0,1,0,0],[1,0,0,0],[0,0,0,0],[0,0,0,0]])
+    np.testing.assert_array_almost_equal(a.pauli_matrix(6)\
+            ,[[0,-1j,0,0],[1j,0,0,0],[0,0,0,0],[0,0,0,0]])
+    np.testing.assert_array_almost_equal(a.pauli_matrix(14)\
+        ,[[1/6**0.5,0,0,0],[0,1/6**0.5,0,0],[0,0,1/6**0.5,0],[0,0,0,-3/6**0.5]])
+
 
 # list of all asserts:
 # assertEqual(a, b)

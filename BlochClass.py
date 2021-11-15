@@ -28,9 +28,6 @@ class Bloch:
         elif self.pauliready: self.dim = ceil(len(self.pauli)**0.5)
         else: self.dim = None
 
-    def pauli_matrix(self,n):
-        raise NotImplementedError('nope')
-
     def evalpauli(self):
         if not self.featureready:
             raise ValueError('feature is required but is None')
@@ -49,6 +46,39 @@ class Bloch:
         for f in self.pauli[:-1]:
             feature.append(f/denom)
         self.feature = feature
+
+    def pauli_matrix(self,n):
+        if self.dim is None:
+            raise ValueError('dim must be defined')
+        counter = 0
+        for i in range(self.dim-1):
+            for j in range(i+1,self.dim):
+                matrix = np.zeros((self.dim,self.dim))
+                matrix[i,j]=1
+                matrix[j,i]=1
+                if n==counter:
+                    return matrix
+                counter+=1
+        for i in range(self.dim-1):
+            for j in range(i+1,self.dim):
+                matrix = np.zeros((self.dim,self.dim),dtype=np.complex_)
+                matrix[i,j]=-1j
+                matrix[j,i]=1j
+                if n==counter:
+                    return matrix
+                counter+=1
+        matrix = np.zeros((self.dim,self.dim),dtype=np.complex_)
+        for i in range(0,self.dim-1):
+            for j in range(i+1):
+                matrix[j,j]=1*(2/(i+1)/(i+2))**0.5
+            matrix[i+1,i+1]=-1*(i+1)*(2/(i+1)/(i+2))**0.5
+            if n==counter:
+                return matrix
+            counter+=1
+        raise ValueError('n should be a non-negative int smaller than dim^2-1')
+
+
+
 
     def evaldensity(self):
         if not self.pauliready:
