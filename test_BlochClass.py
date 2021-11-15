@@ -49,13 +49,22 @@ class TestBlochClass(unittest.TestCase):
     self.assertRaises(TypeError, Bloch,np.array([True]))
 
   def test_evalpauli(self):
-    # Make sure type pauli components are calculated correctly
+    # Make sure pauli components are calculated correctly
     a=Bloch(feature=[1,1]); a.evalpauli() # 2D
     self.assertAlmostEqual(a.pauli,[2/3,2/3,1/3])
     a=Bloch(feature=[1,2,3]); a.evalpauli()  #3D
     self.assertAlmostEqual(a.pauli,[2/15,4/15,6/15,13/15])
     a=Bloch(feature=[1,0,0,1]); a.evalpauli()  #4D
     self.assertAlmostEqual(a.pauli,[2/3,0/3,0/3,2/3,1/3])
+
+  def test_evalfeature(self):
+    # Make sure features are calculated correctly for n+1 dimensional pauli co.
+    a=Bloch(pauli=[2/3,2/3,1/3]); a.evalfeature() # 2D
+    np.testing.assert_array_almost_equal(a.feature, [1,1])
+    a=Bloch(pauli=[2/15,4/15,6/15,13/15]); a.evalfeature()  #3D
+    np.testing.assert_array_almost_equal(a.feature, [1,2,3])
+    a=Bloch(pauli=[2/3,0/3,0/3,2/3,1/3]); a.evalfeature()  #4D
+    np.testing.assert_array_almost_equal(a.feature, [1,0,0,1])
 
 # list of all asserts:
 # assertEqual(a, b)

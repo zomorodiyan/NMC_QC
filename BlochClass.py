@@ -8,25 +8,21 @@ class Bloch:
         self.pauli = pauli          #pauli components
         self.density = None         #density matrix
         self.clas = clas
-
         if self.feature is None: self.featureready = False
         else:
             self.featureready = True
             for f in self.feature:
                 if type(f) not in [int, float, np.int64, np.float64]:
                     raise TypeError("features must be real numbers")
-
-
         if pauli is None: self.pauliready = False
         else:
             self.pauliready = True
             if self.pauli[-1] == 1:
                 raise ValueError('last pauli components cannot be 1')
             radius = sum(p**2 for p in self.pauli)
-            if radius >= 1:
+            if radius > 1:
                 raise ValueError('pauli components must be normalized while'
                     +'radius='+str(radius))
-
         #evalue self.dim (which stands for features dimension)
         if self.featureready: self.dim = len(self.feature)
         elif self.pauliready: self.dim = ceil(len(self.pauli)**0.5)
@@ -38,26 +34,28 @@ class Bloch:
     def evalpauli(self):
         if not self.featureready:
             raise ValueError('feature is required but is None')
-
         denom = sum(f**2 for f in self.feature) + 1
         pauli = []
         for f in self.feature:
             pauli.append(2*f/denom)
         pauli.append((denom-2)/denom)
         self.pauli = pauli
-        '''
-        x = self.feature[0]
-        y = self.feature[1]
-        self.pauli =[2*x/(x**2+y**2+1), 2*y/(x**2+y**2+1),\
-                (x**2+y**2-1)/(x**2+y**2+1)]
-        '''
+
+    def evalfeature(self):
+        if not self.pauliready:
+            raise ValueError('pauli is required but is None')
+        denom = 1-self.pauli[-1]
+        feature = []
+        for f in self.pauli[:-1]:
+            feature.append(f/denom)
+        self.feature = feature
 
     def evaldensity(self):
         if not self.pauliready:
             evalpauli(self)
         raise NotImplementedError('nope')
 
-    def distance(self,bloch2): #done?
+    def distance(self,bloch2):
         if not self.featureready or not bloch2.featureready:
             raise ValueError('both features must be ready. self.featureready:'\
                 +str(self.featureready)+' bloch2.featureready:'\
