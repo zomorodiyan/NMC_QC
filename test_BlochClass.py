@@ -22,6 +22,10 @@ class TestBlochClass(unittest.TestCase):
   def tearDown(self):
       pass
 
+  def test_dim(self):
+      a=Bloch(feature=np.array([1,2]))
+      self.assertAlmostEqual(a.dim,2)
+
   def test_distance(self): # function's name have to start with "test_"
     a = Bloch()
     b = Bloch()
@@ -68,10 +72,10 @@ class TestBlochClass(unittest.TestCase):
 
   def test_paulimatrix(self):
     a=Bloch(); #undefined dim
-    self.assertRaises(ValueError, a.pauli_matrix, 0)
+    self.assertRaises(ValueError, a.pauli_matrix, n=0)
     a=Bloch(); a.dim=2 #invalid n
-    self.assertRaises(ValueError, a.pauli_matrix, 4)
-    self.assertRaises(ValueError, a.pauli_matrix, -4)
+    self.assertRaises(ValueError, a.pauli_matrix, n=4)
+    self.assertRaises(ValueError, a.pauli_matrix, n=-4)
     a=Bloch(); a.dim=2 # 2D
     np.testing.assert_array_almost_equal(a.pauli_matrix(0),[[0,1],[1,0]])
     np.testing.assert_array_almost_equal(a.pauli_matrix(1),[[0,-1j],[1j,0]])
@@ -91,6 +95,13 @@ class TestBlochClass(unittest.TestCase):
     np.testing.assert_array_almost_equal(a.pauli_matrix(14)\
         ,[[1/6**0.5,0,0,0],[0,1/6**0.5,0,0],[0,0,1/6**0.5,0],[0,0,0,-3/6**0.5]])
 
+  def test_densitymatrix(self):
+    with self.assertRaises(ValueError):
+        a = Bloch() #undefined pauli and feature
+        a.evaldensity()
+    a = Bloch(feature=[1,1]); a.evaldensity() # 2D
+    np.testing.assert_array_almost_equal(a.density\
+        ,[[5/6,2/3*(1-1j)],[2/3*(1+1j),1/6]])
 
 # list of all asserts:
 # assertEqual(a, b)

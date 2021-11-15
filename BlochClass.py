@@ -23,10 +23,15 @@ class Bloch:
             if radius > 1:
                 raise ValueError('pauli components must be normalized while'
                     +'radius='+str(radius))
-        #evalue self.dim (which stands for features dimension)
-        if self.featureready: self.dim = len(self.feature)
-        elif self.pauliready: self.dim = ceil(len(self.pauli)**0.5)
-        else: self.dim = None
+        #evalue self.flen (which stands for feature_length(m))
+        #evalue self.dim (which stands for dimension(n))
+        if self.featureready:
+            self.flen = len(self.feature)
+            self.dim = ceil((len(self.feature)+2)**0.5)
+        elif self.pauliready:
+            self.flen = None
+            self.dim = ceil((len(self.pauli)+1)**0.5)
+        else: self.dim = None; self.flen = None
 
     def evalpauli(self):
         if not self.featureready:
@@ -46,6 +51,7 @@ class Bloch:
         for f in self.pauli[:-1]:
             feature.append(f/denom)
         self.feature = feature
+        self.flen = len(self.feature)
 
     def pauli_matrix(self,n):
         if self.dim is None:
@@ -77,20 +83,20 @@ class Bloch:
             counter+=1
         raise ValueError('n should be a non-negative int smaller than dim^2-1')
 
-
-
-
     def evaldensity(self):
         if not self.pauliready:
-            evalpauli(self)
-        raise NotImplementedError('nope')
+            self.evalpauli()
+        self.density=1/self.dim*np.eye(self.dim)\
+            +sum(self.pauli[i]*self.pauli_matrix(i)\
+                for i in range(self.dim**2-1))
+
 
     def distance(self,bloch2):
         if not self.featureready or not bloch2.featureready:
             raise ValueError('both features must be ready. self.featureready:'\
                 +str(self.featureready)+' bloch2.featureready:'\
                 +str(bloch2.featureready))
-        if self.dim is not bloch2.dim:
+        if self.flen is not bloch2.flen:
             raise ValueError('bloch1.dim: ('+str(self.dim)+')'
                 +' is not equal to bloch2.dim: ('+str(bloch2.dim)+')')
         sum = 0
